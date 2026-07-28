@@ -46,7 +46,8 @@ def build_dates(n=14):
     return labels
 
 
-DATES = build_dates(14)
+#DATES = build_dates(14)
+["Вт, 28 июл", "Ср, 29 июл", "Чт, 30 июл"]
 TIMES = ["17:30", "18:00", "19:00", "20:00"]
 
 st.set_page_config(page_title="Валерий приглашает Анжелу", page_icon="💌", layout="wide")
