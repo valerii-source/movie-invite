@@ -251,7 +251,7 @@ for i, (col, t) in enumerate(zip(time_cols, TIMES)):
 
 st.write("")
 st.markdown('<div id="invite-btn">', unsafe_allow_html=True)
-if st.button("✨ Отправить приглашение", key="invite_btn", use_container_width=True):
+if st.button("✨ Подтвердить", key="invite_btn", use_container_width=True):
     st.session_state.show_invite = True
 st.markdown('</div>', unsafe_allow_html=True)
 
