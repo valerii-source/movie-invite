@@ -230,6 +230,35 @@ CSS = """
     font-size: 22px;
     animation: confettiFall 1.9s ease-in forwards;
 }
+
+.stButton > button, .stLinkButton > a {
+    min-height: 44px;
+}
+
+@media (max-width: 700px) {
+    .block-container {
+        padding-left: 0.8rem !important;
+        padding-right: 0.8rem !important;
+        padding-top: 1rem !important;
+    }
+    #hero h1 { font-size: 1.6rem; }
+    #hero p { font-size: 0.9rem; }
+    .section-title { font-size: 1rem; margin: 14px 0 6px 0; }
+
+    [data-testid="stHorizontalBlock"] {
+        flex-wrap: wrap !important;
+        gap: 8px !important;
+    }
+    [data-testid="stHorizontalBlock"] [data-testid="column"] {
+        flex: 1 1 45% !important;
+        min-width: 0 !important;
+        width: 45% !important;
+    }
+    .stButton > button, .stLinkButton > a {
+        font-size: 0.85rem !important;
+        padding: 8px 6px !important;
+    }
+}
 </style>
 """
 st.markdown(CSS, unsafe_allow_html=True)
@@ -237,8 +266,8 @@ st.markdown(CSS, unsafe_allow_html=True)
 st.markdown(
     """
     <div id="hero">
-        <h1>💌 Валерий приглашает Анжелу</h1>
-        <p>Выбери фильм, день и время — посмотрим его вместе онлайн</p>
+        <h1> Валерий приглашает Анжелу</h1>
+        <p>Выбери фильм, день и время</p>
     </div>
     """,
     unsafe_allow_html=True,
@@ -317,7 +346,7 @@ st.markdown(
 
 st.write("")
 st.markdown('<div id="invite-btn">', unsafe_allow_html=True)
-if st.button("✨ Подтвердить", key="invite_btn", use_container_width=True):
+if st.button("✨ Подтверждаю", key="invite_btn", use_container_width=True):
     st.session_state.show_invite = True
     log_invite(current_movie["title"], current_date, current_time)
 st.markdown('</div>', unsafe_allow_html=True)
