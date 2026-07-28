@@ -1,5 +1,18 @@
+import csv
 import datetime
+import os
 import streamlit as st
+
+LOG_PATH = os.path.join(os.path.dirname(__file__), "invites_log.csv")
+
+
+def log_invite(movie_title, date_label, time_label):
+    is_new = not os.path.exists(LOG_PATH)
+    with open(LOG_PATH, "a", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f)
+        if is_new:
+            writer.writerow(["timestamp", "movie", "date", "time"])
+        writer.writerow([datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), movie_title, date_label, time_label])
 
 MOVIES = [
     {
@@ -250,25 +263,45 @@ for i, (col, t) in enumerate(zip(time_cols, TIMES)):
             st.session_state.time_idx = i
             st.rerun()
 
+current_movie = MOVIES[st.session_state.movie_idx]
+current_date = DATES[st.session_state.date_idx]
+current_time = TIMES[st.session_state.time_idx]
+
+st.markdown(
+    f"""
+    <p style="color:#cfd0ff; margin:6px 0 14px 0;">
+    Выбрано сейчас: <b>{current_movie['emoji']} {current_movie['title']}</b>
+    &nbsp;·&nbsp; 📅 <b>{current_date}</b> &nbsp;·&nbsp; 🕒 <b>{current_time}</b>
+    </p>
+    """,
+    unsafe_allow_html=True,
+)
+
 st.write("")
 st.markdown('<div id="invite-btn">', unsafe_allow_html=True)
-if st.button("✨ Подтвердить", key="invite_btn", use_container_width=True):
+if st.button("✨ Отправить приглашение", key="invite_btn", use_container_width=True):
     st.session_state.show_invite = True
+    log_invite(current_movie["title"], current_date, current_time)
 st.markdown('</div>', unsafe_allow_html=True)
 
 if st.session_state.show_invite:
-    movie = MOVIES[st.session_state.movie_idx]
-    date_label = DATES[st.session_state.date_idx]
-    time_label = TIMES[st.session_state.time_idx]
     st.markdown(
         f"""
         <div class="result-card">
         <h3>💌 Приглашение готово!</h3>
         <p><b>Валерий</b> приглашает <b>Анжелу</b> посмотреть онлайн:</p>
-        <p><b>{movie['emoji']} {movie['title']}</b><br>{movie['genre']} · {movie['time']}</p>
-        <p>📅 <b>{date_label}</b> &nbsp; 🕒 <b>{time_label}</b></p>
+        <p><b>{current_movie['emoji']} {current_movie['title']}</b><br>{current_movie['genre']} · {current_movie['time']}</p>
+        <p>📅 <b>{current_date}</b> &nbsp; 🕒 <b>{current_time}</b></p>
         <p>Захвати попкорн — включаем в это время! 🍿✨</p>
         </div>
         """,
         unsafe_allow_html=True,
     )
+
+if os.path.exists(LOG_PATH):
+    with st.expander("📋 История приглашений"):
+        with open(LOG_PATH, encoding="utf-8") as f:
+            rows = list(csv.reader(f))
+        for row in rows[1:][::-1]:
+            ts, movie_title, date_label, time_label = row
+            st.write(f"{ts} — **{movie_title}**, {date_label}, {time_label}")
