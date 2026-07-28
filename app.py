@@ -1,18 +1,56 @@
-import csv
 import datetime
-import os
+import json
+
+import boto3
 import streamlit as st
 
-LOG_PATH = os.path.join(os.path.dirname(__file__), "invites_log.csv")
+R2_PREFIX = "invites/"
+
+
+def get_r2_client():
+    try:
+        secrets = st.secrets
+        account_id = secrets["R2_ACCOUNT_ID"]
+        access_key = secrets["R2_ACCESS_KEY_ID"]
+        secret_key = secrets["R2_SECRET_ACCESS_KEY"]
+    except (KeyError, FileNotFoundError):
+        return None
+    return boto3.client(
+        "s3",
+        endpoint_url=f"https://{account_id}.r2.cloudflarestorage.com",
+        aws_access_key_id=access_key,
+        aws_secret_access_key=secret_key,
+        region_name="auto",
+    )
 
 
 def log_invite(movie_title, date_label, time_label):
-    is_new = not os.path.exists(LOG_PATH)
-    with open(LOG_PATH, "a", newline="", encoding="utf-8") as f:
-        writer = csv.writer(f)
-        if is_new:
-            writer.writerow(["timestamp", "movie", "date", "time"])
-        writer.writerow([datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), movie_title, date_label, time_label])
+    client = get_r2_client()
+    if client is None:
+        return
+    now = datetime.datetime.now()
+    key = f"{R2_PREFIX}{now.strftime('%Y%m%dT%H%M%S')}.json"
+    body = json.dumps({
+        "timestamp": now.strftime("%Y-%m-%d %H:%M:%S"),
+        "movie": movie_title,
+        "date": date_label,
+        "time": time_label,
+    })
+    client.put_object(Bucket=st.secrets["R2_BUCKET"], Key=key, Body=body.encode("utf-8"))
+
+
+def get_invite_history():
+    client = get_r2_client()
+    if client is None:
+        return None
+    bucket = st.secrets["R2_BUCKET"]
+    resp = client.list_objects_v2(Bucket=bucket, Prefix=R2_PREFIX)
+    entries = []
+    for obj in resp.get("Contents", []):
+        data = client.get_object(Bucket=bucket, Key=obj["Key"])
+        entries.append(json.loads(data["Body"].read()))
+    entries.sort(key=lambda e: e["timestamp"], reverse=True)
+    return entries
 
 MOVIES = [
     {
@@ -63,7 +101,7 @@ def build_dates(n=14):
 DATES = ["Вт, 28 июл", "Ср, 29 июл", "Чт, 30 июл"]
 TIMES = ["17:30", "18:00", "19:00", "20:00"]
 
-st.set_page_config(page_title="Валерий приглашает Анжелу", page_icon="💌", layout="wide")
+st.set_page_config(page_title="Валера приглашает", page_icon="💌", layout="wide")
 
 CSS = """
 <style>
@@ -298,10 +336,12 @@ if st.session_state.show_invite:
         unsafe_allow_html=True,
     )
 
-if os.path.exists(LOG_PATH):
+history = get_invite_history()
+if history is None:
+    st.caption("История приглашений: не настроен R2 (заполни .streamlit/secrets.toml)")
+else:
     with st.expander("📋 История приглашений"):
-        with open(LOG_PATH, encoding="utf-8") as f:
-            rows = list(csv.reader(f))
-        for row in rows[1:][::-1]:
-            ts, movie_title, date_label, time_label = row
-            st.write(f"{ts} — **{movie_title}**, {date_label}, {time_label}")
+        if not history:
+            st.write("Пока пусто.")
+        for entry in history:
+            st.write(f"{entry['timestamp']} — **{entry['movie']}**, {entry['date']}, {entry['time']}")
