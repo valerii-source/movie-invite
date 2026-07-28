@@ -317,7 +317,7 @@ st.markdown(
 
 st.write("")
 st.markdown('<div id="invite-btn">', unsafe_allow_html=True)
-if st.button("✨ Отправить приглашение", key="invite_btn", use_container_width=True):
+if st.button("✨ Подтвердить", key="invite_btn", use_container_width=True):
     st.session_state.show_invite = True
     log_invite(current_movie["title"], current_date, current_time)
 st.markdown('</div>', unsafe_allow_html=True)
@@ -326,11 +326,9 @@ if st.session_state.show_invite:
     st.markdown(
         f"""
         <div class="result-card">
-        <h3>💌 Приглашение готово!</h3>
         <p><b>Валерий</b> приглашает <b>Анжелу</b> посмотреть онлайн:</p>
         <p><b>{current_movie['emoji']} {current_movie['title']}</b><br>{current_movie['genre']} · {current_movie['time']}</p>
         <p>📅 <b>{current_date}</b> &nbsp; 🕒 <b>{current_time}</b></p>
-        <p>Захвати попкорн — включаем в это время! 🍿✨</p>
         </div>
         """,
         unsafe_allow_html=True,
