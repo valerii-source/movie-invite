@@ -266,7 +266,7 @@ st.markdown(CSS, unsafe_allow_html=True)
 st.markdown(
     """
     <div id="hero">
-        <h1> Валерий приглашает Анжелу</h1>
+        <h1> Валерий приглашает</h1>
         <p>Выбери фильм, день и время</p>
     </div>
     """,
@@ -355,7 +355,7 @@ if st.session_state.show_invite:
     st.markdown(
         f"""
         <div class="result-card">
-        <p><b>Валерий</b> приглашает <b>Анжелу</b> посмотреть онлайн:</p>
+        <p><b>Валерий</b> приглашает <b></b> посмотреть онлайн:</p>
         <p><b>{current_movie['emoji']} {current_movie['title']}</b><br>{current_movie['genre']} · {current_movie['time']}</p>
         <p>📅 <b>{current_date}</b> &nbsp; 🕒 <b>{current_time}</b></p>
         </div>
